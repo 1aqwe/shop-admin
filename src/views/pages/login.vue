@@ -85,7 +85,6 @@ export default {
       this.$refs.loginFormRef.validate(async (valid) => {
         console.log(valid);
         if (!valid) {
-            
           return;//valid=false时返回，不在进行axios验证
         }
         const {data:res} = await this.$http.post("login", this.loginForm);

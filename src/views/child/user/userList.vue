@@ -1,6 +1,7 @@
 <template>
   <div>
     <!--面包屑导航区域  -->
+
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>用户管理</el-breadcrumb-item>
@@ -76,11 +77,13 @@
               content="分配角色"
               placement="top"
               :enterable="false"
+             
             >
               <el-button
                 type="warning"
                 size="mini"
                 icon="el-icon-setting"
+                 @click="showsetRoleDialog(scope.row)"
               ></el-button>
             </el-tooltip>
           </template>
@@ -174,9 +177,36 @@
       <span>是否删除当前用户</span>
       <span slot="footer">
         <el-button @click="delectDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="delectUser"
-          >确 定</el-button
-        >
+        <el-button type="primary" @click="delectUser">确 定</el-button>
+      </span>
+    </el-dialog>
+    <!-- 分配角色对话框 -->
+    <el-dialog
+      title="分配角色"
+      :visible.sync="setroleDialogVisible"
+      width="50%"
+      center
+    >
+    <p>当前的用户：{{setRow.username}}</p>
+    <p>当前的角色：{{setRow.role_name}}</p>
+    <p>
+    <!-- 选择器 -->
+     <el-select v-model="SelectRoleId" placeholder="请选择">
+    <el-option
+      v-for="item in SetroleList"
+      :key="item.id"
+      :label="item.roleName"
+      :value="item.id">
+    </el-option>
+  </el-select>
+    </p>
+    <p>
+    
+    {{setRow}}</p>
+
+      <span slot="footer">
+        <el-button @click="setroleDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="setUser()">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -296,8 +326,13 @@ export default {
         ],
       },
       // 删除用户数据
-      delectDialogVisible:false,
-      deleteForm:{}
+      delectDialogVisible: false,
+      deleteForm: {},
+      // 设置权限
+      setroleDialogVisible: false,
+      setRow:[],
+      SetroleList:[],
+      SelectRoleId:'',
 
     };
   },
@@ -383,23 +418,37 @@ export default {
       this.getUserlist();
     },
     // 删除用户
-    showdelectDialog(row){
-      this.delectDialogVisible=true
-      console.log(row)
-      this.deleteForm=row
-      
+    showdelectDialog(row) {
+      this.delectDialogVisible = true;
+      console.log(row);
+      this.deleteForm = row;
     },
-  async  delectUser(){
-      console.log('delect')
-      const res=await  this.$http.delete('users/'+this.deleteForm.id)
-      if(res.data.meta.status!==200){
-         this.$message.error("用户删除失败");
+    async delectUser() {
+      console.log("delect");
+      const res = await this.$http.delete("users/" + this.deleteForm.id);
+      if (res.data.meta.status !== 200) {
+        this.$message.error("用户删除失败");
       }
-       this.$message.success("删除成功");
-       this.delectDialogVisible=false
-       this.getUserlist()
 
-    }
+      this.$message.success("删除成功");
+      this.delectDialogVisible = false;
+      this.getUserlist();
+    },
+    // 设置权限
+  async showsetRoleDialog(row) {
+     this.setRow=row
+     const res = await this.$http.get("roles");
+      console.log(res);
+      if (res.data.meta.status !== 200)
+      return this.$message.error("获取用户列表失败！");
+      this.SetroleList = res.data.data;
+      console.log(this.SetroleList)
+      this.setroleDialogVisible=true
+
+    },
+    setUser(){
+   
+    },
   },
   created() {
     this.getUserlist();

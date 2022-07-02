@@ -7,6 +7,8 @@ import 'element-ui/lib/theme-chalk/index.css';
 import '@/assets/css/global.css' 
 import '@/assets/fonts/iconfont.css'
 import axios from 'axios'
+// 树形结构
+import ZkTable from 'vue-table-with-tree-grid'
 Vue.config.productionTip = false
 Vue.prototype.$http=axios
 axios.defaults.baseURL ='https://lianghj.top:8888/api/private/v1/'
@@ -19,6 +21,8 @@ const token= config.headers.Authorization=window.sessionStorage.getItem('token')
   return config
 })
 Vue.use(ElementUI);
+Vue.use(ZkTable)
+
 
 
 new Vue({

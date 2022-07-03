@@ -7,13 +7,13 @@ html,body,#app{
 .el-breadcrumb{
     margin-bottom: 15px;
     font-size: 12px;
-    text-align: center;
+  
 
 }
 .el-card{
     box-shadow: 0 1px 1px rgba(0, 0, 0, .15) !important;
-    text-align: center;
+   text-align: left;
 }
-.el-cascader-menu{
+/* .el-cascader-menu{
     height: 300px !important;
-  }
+  } */

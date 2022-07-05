@@ -14,6 +14,12 @@ html,body,#app{
     box-shadow: 0 1px 1px rgba(0, 0, 0, .15) !important;
    text-align: left;
 }
+.el-steps{
+margin: 15px 0;
+}
+.ql-editor{
+    min-height: 300px;
+}
 /* .el-cascader-menu{
     height: 300px !important;
   } */

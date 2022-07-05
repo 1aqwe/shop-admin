@@ -8,7 +8,11 @@ import '@/assets/css/global.css'
 import '@/assets/fonts/iconfont.css'
 import axios from 'axios'
 import * as echarts from 'echarts';
+// 加载
+import NProgress from 'nprogress';
+import 'nprogress/nprogress.css'
 // 文件组件全局挂载
+
 import VueQuillEditor from 'vue-quill-editor'
 
 import 'quill/dist/quill.core.css' // import styles
@@ -23,11 +27,17 @@ Vue.config.productionTip = false
 Vue.prototype.$http=axios
 axios.defaults.baseURL ='https://lianghj.top:8888/api/private/v1/'
 // axios请求拦截
+// 在request展示进度条
 axios.interceptors.request.use((config)=>{
   console.log(config)
+  NProgress.start()
   // 为请求对象添加token验证Authorization字段
 const token= config.headers.Authorization=window.sessionStorage.getItem('token');
   // if(token){ config.headers.token=token}
+  return config
+})
+axios.interceptors.response.use((config)=>{
+  NProgress.done()
   return config
 })
 Vue.use(ElementUI);

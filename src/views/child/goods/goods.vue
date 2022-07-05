@@ -73,35 +73,42 @@
     </el-card>
     <!-- 编辑对话框 -->
     <el-dialog title="提示" :visible.sync="editdialogVisible" width="70%">
-    <!-- step步骤条 -->
-    <el-steps :space="200" :active=" activeIndex - 0" finish-status="success"  align-center>
-    <el-step title="基本信息"></el-step>
+      <!-- step步骤条 -->
+      <el-steps
+        :space="200"
+        :active="activeIndex - 0"
+        finish-status="success"
+        align-center
+      >
+        <el-step title="基本信息"></el-step>
         <el-step title="商品参数"></el-step>
         <el-step title="商品属性"></el-step>
         <el-step title="商品图片"></el-step>
         <el-step title="商品内容"></el-step>
         <el-step title="完成"></el-step>
-</el-steps>
-    <!-- form表单 -->
-      <el-form  
-      :model="editruleForm"
+      </el-steps>
+      <!-- form表单 -->
+      <el-form
+        :model="editruleForm"
         :rules="editrules"
-        ref="editruleForm"
+        ref="editruleFormRef"
         label-width="100px"
-        
-        label-position="top">
-        <el-tabs :tab-position="'left'" 
+        label-position="top"
+      >
+        <el-tabs
+          :tab-position="'left'"
           v-model="activeIndex"
-            :before-leave="beforeTableave"
-         @tab-click="tabClicked"
+          :before-leave="beforeTableave"
+          @tab-click="tabClicked"
         >
           <!-- tag1 -->
           <el-tab-pane label="基本信息" name="0">
-          <el-form-item label="商品名称" prop="goods_name">
+            <el-form-item label="商品名称" prop="goods_name">
               <el-input v-model="editruleForm.goods_name"></el-input>
-                 </el-form-item>
-              <el-form-item label="商品价格" prop="goods_price">
-              <el-input v-model="editruleForm.goods_price"
+            </el-form-item>
+            <el-form-item label="商品价格" prop="goods_price">
+              <el-input
+                v-model="editruleForm.goods_price"
                 type="number"
               ></el-input>
             </el-form-item>
@@ -119,18 +126,18 @@
               ></el-input>
             </el-form-item>
             <!-- 分类 -->
-             <el-form-item label="商品分类" prop="goods_cat">
+            <el-form-item label="商品分类" prop="goods_cat">
               <el-cascader
                 v-model="editruleForm.goods_cat"
                 :options="CageList"
                 :props="cascaerProps"
-              @change="handleChange"
+                @change="handleChange"
                 clearable
               ></el-cascader>
             </el-form-item>
           </el-tab-pane>
           <!-- tag2 -->
-             <el-tab-pane label="商品参数" name="1">
+          <el-tab-pane label="商品参数" name="1">
             <el-form-item
               :label="item.attr_name"
               v-for="item in paramList"
@@ -139,11 +146,7 @@
               <!-- 复选框 -->
               <!-- <el-checkbox :indeterminate="isIndeterminate" v-model="item.attr_vals" @change="handleCheckAllChange">全选</el-checkbox> -->
               <div style="margin: 15px 0"></div>
-              <el-checkbox-group
-                v-model="item.attr_vals"
-              
-                border
-              >
+              <el-checkbox-group v-model="item.attr_vals" border>
                 <el-checkbox
                   v-for="(value, i) in item.attr_vals"
                   :label="value"
@@ -154,7 +157,7 @@
               </el-checkbox-group>
             </el-form-item>
           </el-tab-pane>
-           <!-- tab3 -->
+          <!-- tab3 -->
           <el-tab-pane label="商品属性" name="2">
             <el-form-item
               :label="item.attr_name"
@@ -165,17 +168,43 @@
             </el-form-item>
           </el-tab-pane>
           <!-- tag4 -->
-          <el-tab-pane label="商品图片" name="3">定时任务补偿</el-tab-pane>
+          <el-tab-pane label="商品图片" name="3">
+            <!-- aciton图片要上传的api地址 -->
+            <div class="block" v-for="(img,index) in editruleForm.pics" :key="index">
+              <!-- <span class="demonstration">{{ fit }}</span> -->
+              <el-image
+               
+                :src="img.pics_big"
+               
+              ></el-image>
+            </div>
+
+            <el-upload
+              :action="uploadURL"
+              :on-preview="handlePreview"
+              :on-remove="handleRemove"
+              :headers="headerObj"
+              :on-success="handsuccess"
+              list-type="picture"
+            >
+              <el-button size="small" type="primary">点击上传</el-button>
+            </el-upload>
+          </el-tab-pane>
           <!-- tag5 -->
+           <!-- 富文本编辑器 -->
           <el-tab-pane label="商品内容" name="4">
-            <el-form-item> </el-form-item>
+            <quill-editor
+              ref="myQuillEditor"
+              v-model="editruleForm.goods_introduce"           />
+            <!-- 添加按钮 -->
+            <el-button type='primary' >添加</el-button>
           </el-tab-pane>
         </el-tabs>
       </el-form>
 
       <span slot="footer" class="dialog-footer">
         <el-button @click="editdialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="editdialogVisible = false"
+        <el-button type="primary" @click="submit"
           >确 定</el-button
         >
       </span>
@@ -184,9 +213,9 @@
 </template>
 
 <script>
-// import  _  from  'lodash'
-import Bread from "../../../components/bread/bread.vue";
 
+import Bread from "../../../components/bread/bread.vue";
+// import  lodash  from  'lodash'
 export default {
   components: { Bread },
   data() {
@@ -204,16 +233,16 @@ export default {
       activeIndex: "0",
       editruleForm: {
         goods_name: "",
-        goods_price:0,
-        goods_weight:0,
-        goods_number:0,
-        goods_cat:[],
+        goods_price: 0,
+        goods_weight: 0,
+        goods_number: 0,
+        goods_cat: [],
         pics: [],
-        goods_introduce:'',
-        attrs:[]
+        goods_introduce: "",
+        attrs: [],
       },
       // 表单验证
-       editrules: {
+      editrules: {
         goods_name: {
           required: true,
           message: "请输入商品名称",
@@ -239,26 +268,29 @@ export default {
           message: "请选择商品类别",
           trigger: "blur",
         },
-       
       },
       // 练级选择器
-        CageList: [],
+      CageList: [],
       ParnetCagelist: [],
-       // 选中的父级id
+      // 选中的父级id
       selectKeys: [],
       cascaerProps: {
         value: "cat_id",
         label: "cat_name",
         children: "children",
       },
-      paramList:[],
-      checked:false,
-   
-     
-      paramList:[],
-      stateParamList:[],
+      paramList: [],
+      checked: false,
 
-      
+      paramList: [],
+      stateParamList: [],
+      uploadURL: "https://lianghj.top:8888/api/private/v1/upload",
+      headerObj: {
+        Authorization: window.sessionStorage.getItem("token"),
+      },
+      previewPath: "",
+      previewVisible: false,
+      goods_id:'',
     };
   },
   methods: {
@@ -271,6 +303,37 @@ export default {
       this.goodsList = res.data.data.goods;
       // console.log("this.userList", this.userList);
       this.total = res.data.data.total;
+        this.cateList = this.getCateList;
+      
+
+    
+
+    },
+    // 移除图片
+    handleRemove(file) {
+      console.log(file);
+      // 获取将要删除的图片的临时路径
+      const filePath = file.response.data.tmp_path;
+      // 从pics数组中找到图片的索引
+      const i = this.editruleForm.pics.findIndex((x) => x.pic === filePath);
+      this.editruleForm.pics.splice(i, 1);
+      console.log(this.editruleForm);
+    },
+    // 图片预览
+    handlePreview(file) {
+      console.log(file);
+      this.previewPath = file.response.data.url;
+      this.previewVisible = true;
+      console.log(this.previewPath);
+    },
+    //监听 图片上传成功事件
+    handsuccess(response) {
+      console.log(response);
+      const picInfo = {
+        pic: response.data.tmp_path,
+      };
+      this.editruleForm.pics.push(picInfo);
+      console.log(this.editruleForm);
     },
     // 分页
     handleSizeChange(val) {
@@ -288,10 +351,10 @@ export default {
       this.$router.push("/home/goods/add");
     },
     // 获取分类
-  async  getCagelist(){
-      const res =await this.$http.get('categories')
-      console.log(res)
-        if (res.data.meta.status !== 200) {
+    async getCagelist() {
+      const res = await this.$http.get("categories");
+      console.log(res);
+      if (res.data.meta.status !== 200) {
         return this.$message.error("获取分类列表失败");
       }
       this.CageList = res.data.data;
@@ -302,14 +365,14 @@ export default {
         this.editruleForm.goods_cat = [];
       }
     },
- beforeTableave(activename, oldactivename) {
+    beforeTableave(activename, oldactivename) {
       console.log(activename, oldactivename);
       if (oldactivename === "0" && this.editruleForm.goods_cat.length !== 3) {
         this.$message.info("请先选择分类");
         return false;
       }
     },
-   // tabs是哪一个
+    // tabs是哪一个
     async tabClicked() {
       console.log(this.activeIndex);
       if (this.activeIndex === "1") {
@@ -337,33 +400,69 @@ export default {
         this.stateParamList = Stateres.data.data;
       }
     },
-    // 编辑
+    // 点击编辑按钮显示编辑对话框及里面的数据
     async eidtbtn(row) {
       console.log(row);
-      this.getCagelist()
+      this.getCagelist();
+      // 点击查询想要的数据
       const res = await this.$http.get(`goods/${row.goods_id}`);
       console.log(res);
       if (res.data.meta.status !== 200) {
         this.$message.error("商品数据获取失败");
       }
-  
-this.editruleForm = res.data.data;
-// this.model=res.data.data.goods_cat.join(',')
-// console.log('this.model',this.model)
-// const form= _.cloneDeep(this.editruleForm)
-// this.modeleditruleForm.goods_cat=
-// this.editruleForm.goods_cat.join(',')
-// console.log('model',model)
-
-// this.editruleForm = _.cloneDeep(this.editruleForm)
-// this.editruleForm.goods_cat = this.editruleForm.goods_cat.join(',')
-
-
-
- 
-    
- console.log('goods_cat',this.editruleForm.goods_cat)
+ console.log("goods_cat", this.editruleForm.goods_cat);
+      this.editruleForm = res.data.data;
+      this.goods_id=res.data.data.goods_id
+      // 重要！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
+        // 设置级联选择器绑定值
+    const tempArray = res.data.data.goods_cat.split(',');
+    // 这里必须重新赋值为空数组，再赋值，否则v-model不能实现默认值回显
+    this.editruleForm.goods_cat = [];
+    tempArray.forEach(item => {
+      // item - 0是把数据类型转换为数字，以与cateList 数据类型一致，否则不能正确回显默认值
+      this.editruleForm.goods_cat.push(item - 0);
+    });
       this.editdialogVisible = true;
+    },
+    // 点击提交编辑
+    submit(){
+      // 表单验证
+      
+      this.$refs.editruleFormRef.validate(async valid=>{
+        if(!valid){
+                return this.$message.error('请填写必要的表单项')
+            }
+        this.paramList.forEach(item=>{
+        const newInfo={
+        attr_id:item.attr_id,
+        attr_vals:item.attr_vals.join(' ')
+        }
+        this.editruleForm.attrs.push(newInfo)
+    })
+    // stateParamList: []
+    this.stateParamList.forEach(item=>{
+        const newInfo={
+            attr_id:item.attr_id,
+            attr_vals:item.attr_vals
+      
+        }
+        this.editruleForm.attrs.push(newInfo)
+    })
+      this.editruleForm.goods_cat=this.editruleForm.goods_cat.join(',')
+        const res=await this.$http.put(`goods/${this.goods_id}`,this.editruleForm)
+           console.log(res)
+            if(res.data.meta.status!==200){
+                this.$message.error('商品修改失败')
+            }
+             this.$message.success('商品修改成功')
+              this. getgoodsList()
+            //  this.$router.push('/home/goods')
+         
+             this.editdialogVisible=false
+       
+      // goods/:id
+      })
+      
     },
     //删除
     async deletebtn(row) {
@@ -389,8 +488,6 @@ this.editruleForm = res.data.data;
       this.$message.success("删除成功");
       this.getgoodsList();
     },
-     
-   
   },
   // 监听搜索框为空
   watch: {
@@ -406,7 +503,6 @@ this.editruleForm = res.data.data;
   },
   created() {
     this.getgoodsList();
-
   },
 };
 </script>
